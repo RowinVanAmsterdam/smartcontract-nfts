@@ -50,11 +50,11 @@ const deployRandomIpfsNft: DeployFunction = async function (hre: HardhatRuntimeE
     console.log("tokenUris", tokenUris);
     const args: any[] = [
         vrfCoordinatorV2Address,
-        networkConfig[chainId].mintFee,
-        networkConfig[chainId].gasLane,
         subscriptionId,
+        networkConfig[chainId].gasLane,
         networkConfig[chainId].callbackGasLimit,
         tokenUris,
+        networkConfig[chainId].mintFee,
     ];
 
     const randomIpfsNft = await deploy("RandomIpfsNft", {
