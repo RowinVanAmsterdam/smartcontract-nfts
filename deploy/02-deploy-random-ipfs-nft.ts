@@ -4,9 +4,15 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { verify } from "../utils/verify";
 import { storeImages, storeTokenUriMetadata } from "../utils/uploadToPinata";
 import "dotenv/config";
+import { ethers } from "hardhat";
 
 const imagesLocation = "./images/randomNft";
-let tokenUris = ["ipfs://QmaVkBn2tKmjbhphU7eyztbvSQU5EXDdqRyXZtRhSGgJGo","ipfs://QmYQC5aGZu2PTH8XzbJrbDnvhj3gVs7ya33H9mqUNvST3d","ipfs://QmZYmH5iDbD6v3U2ixoVAjioSzvWJszDzYdbeCLquGSpVm"];
+let tokenUris = [
+    "ipfs://QmaVkBn2tKmjbhphU7eyztbvSQU5EXDdqRyXZtRhSGgJGo",
+    "ipfs://QmYQC5aGZu2PTH8XzbJrbDnvhj3gVs7ya33H9mqUNvST3d",
+    "ipfs://QmZYmH5iDbD6v3U2ixoVAjioSzvWJszDzYdbeCLquGSpVm",
+];
+const FUND_AMOUNT = "1000000000000000000000";
 
 const metadataTemplate = {
     name: "",
@@ -39,6 +45,7 @@ const deployRandomIpfsNft: DeployFunction = async function (hre: HardhatRuntimeE
         const tx = await vrfCoordinatorV2Mock.createSubscription();
         const txReceipt = await tx.wait(1);
         subscriptionId = txReceipt.events[0].args.subId;
+        await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT);
     } else {
         vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2;
         subscriptionId = networkConfig[chainId].subscriptionId;
@@ -74,6 +81,7 @@ const deployRandomIpfsNft: DeployFunction = async function (hre: HardhatRuntimeE
 const handleTokenUris = async () => {
     const tokenUris: any[] = [];
     const { responses: imageUploadResponses, files } = await storeImages(imagesLocation);
+
     for (const imageUploadResponseIndex in imageUploadResponses) {
         let tokenUriMetadata = { ...metadataTemplate };
         tokenUriMetadata.name = files[imageUploadResponseIndex].replace(".png", "");
@@ -85,6 +93,7 @@ const handleTokenUris = async () => {
     }
     console.log("Token URIs Uploaded! They are:");
     console.log(tokenUris);
+
     return tokenUris;
 };
 
